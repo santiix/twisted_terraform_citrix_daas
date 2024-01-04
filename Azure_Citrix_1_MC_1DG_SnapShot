@@ -71,7 +71,7 @@ resource "citrix_daas_machine_catalog" "terraform-azure-catalog" {
             naming_scheme_type ="Numeric"
             domain =            "kloudkoala.local"
             }
-    }
+      }
 }
 
 resource "citrix_daas_delivery_group" "TER-AZ-MULT" {
