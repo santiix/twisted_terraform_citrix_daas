@@ -40,7 +40,6 @@ resource "citrix_daas_hypervisor_resource_pool" "RESOURCE-POOL" {
         "AZURE VNET SUBNET NAME",
         ]
 }
-/*
 resource "citrix_daas_machine_catalog" "AZURE-CATALOG" {
     name                        = "CATALOG NAME"
     description                 = "CATALOG DESCRIPTION"
@@ -73,7 +72,7 @@ resource "citrix_daas_machine_catalog" "AZURE-CATALOG" {
             }
 	number_of_total_machines =  ADD-A-VALUE
         machine_account_creation_rules ={
-#15 Character limit on naming_scheme
+	    #15 Character limit on naming_scheme
 	    #KEEP NAMING_SCHEME IT UNDER 15 CHARACTER OR IT WILL FAIL
             naming_scheme =     "XX-XX-XX-##"
 	    #THIS CAN BE Numeric, Alphabetic or Unicode.
@@ -82,7 +81,6 @@ resource "citrix_daas_machine_catalog" "AZURE-CATALOG" {
             }
     }
 }
-
 resource "citrix_daas_delivery_group" "AZURE-DELIVERY-GROUP" {
     name = "DELIVERY-GROUP-NAME"
     associated_machine_catalogs = [
@@ -127,4 +125,3 @@ resource "citrix_daas_delivery_group" "AZURE-DELIVERY-GROUP" {
         ]
     }
 }
-*/
