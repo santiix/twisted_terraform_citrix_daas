@@ -17,6 +17,7 @@ it, so review your "terraform plan" output carefully.
 https://registry.terraform.io/providers/citrix/citrix/latest/docs/resources/daas_hypervisor#import
 
 First you need to download, install and run the Citrix DaaS Remote Powershell SDK: https://www.citrix.com/downloads/citrix-cloud/product-software/xenapp-and-xendesktop-service.html
+
 To load the Citrix SDK, run asnp Citrix*  Then run the following command: Get-BrokerHypervisorConnection
 
 **Take note of the: HypHypervisorConnectionUid**
@@ -27,8 +28,9 @@ terraform import citrix_daas_hypervisor.AZURE-HYPERVISOR HypHypervisorConnection
 https://registry.terraform.io/providers/citrix/citrix/latest/docs/resources/daas_hypervisor_resource_pool#import
 
 If not already done so, you need to download, install and run the Citrix DaaS Remote Powershell SDK: https://www.citrix.com/downloads/citrix-cloud/product-software/xenapp-and-xendesktop-service.html
+
 To load the Citrix SDK, run asnp Citrix*  
-Then run the following command:dir XDHyp:\HostingUnits
+Then run the following command:  dir XDHyp:\HostingUnits
 
 **Take note of the: HostingUnitUid** 
 
