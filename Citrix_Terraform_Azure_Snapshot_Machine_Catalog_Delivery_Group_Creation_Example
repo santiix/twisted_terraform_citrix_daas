@@ -1,0 +1,125 @@
+terraform {
+  required_providers {
+    citrix = {
+      source = "citrix/citrix"
+      version = "0.3.5"
+    }
+  }
+}
+
+# Citrix Cloud Provider
+provider "citrix" {
+  customer_id   = "CC Customer ID"
+  client_id     = "CC API Access Client ID"
+  client_secret = "CC API Access Client Secret"
+}
+
+# Azure Hypervisor Connection
+resource "citrix_daas_hypervisor" "AZURE-HYPERVISOR" {
+  name                = "CC Hosting Connection Name"
+  connection_type     = "AzureRM"
+  #Use the CCSDK cmdlet to find your "Zone ID": Get-ConfigZone
+  zone                = "Zone ID"
+  #NAVIGATE TO MICROSOFT ENTRA ID DASHBOARD TO GET: "TENANT ID"
+  active_directory_id = "TENANT ID"
+  #AZURE SUBSCRIPTION
+  subscription_id     = "SUBSCRIPTION ID"
+  #NAVIGATE TO MICROSOFT ENTRA ID - APP REGISTRATIONS - FIND YOUR CC APP REGISTRATION
+  application_secret  = "APP SECRET"
+  application_id      = "APP ID"
+{
+
+# Azure Hypervisor Resource Pool
+resource "citrix_daas_hypervisor_resource_pool" "RESOURCE-POOL" {
+  name                           = "CC Resource Pool Name"
+  hypervisor                     = citrix_daas_hypervisor.AZURE-HYPERVISOR.id 
+  #RUN POWERSHELL COMMAND TO GET REGION-LOCATION: Get-AzLocation | Select Location,Displayname
+  region                         = "REGION-LOCATION"
+  virtual_network_resource_group = "AZURE RESOURCEGROUP NAME"
+  virtual_network                = "AZURE VNET NAME"
+  subnets                        = [
+        "AZURE VNET SUBNET NAME",
+        ]
+}
+
+resource "citrix_daas_machine_catalog" "AZURE-CATALOG" {
+    name                        = "CATALOG NAME"
+    description                 = "CATALOG DESCRIPTION"
+    zone                        = "ZONE ID"
+    service_account             = "SERVICE ACCOUNT UPN"
+    service_account_password    = "SERVICE ACCOUNT PASSWORD"
+    allocation_type             = "Random or Static - Remove One"
+    session_support             = "MultiSession or SingleSession"
+    provisioning_scheme         =   {
+	      storage_type = "StandardSSD_LRS"
+        use_managed_disks = true
+        #os_type = "Windows"
+        machine_config = {
+	          hypervisor = citrix_daas_hypervisor.AZURE-HYPERVISOR.id
+            hypervisor_resource_pool = citrix_daas_hypervisor_resource_pool.RESOURCE-POOL.id
+      	    #RUN THE BELOW COMMAND IN AZURE POWERSHELL TO GET SERVICE OFFERINGS PER REGION, EXAMPLE USES EASTUS
+	          #Get-AzVMSize -Location eastus | Where Name -like 'Standard_D2*' | Select Name,NumberOfCores,MemoryInMB,OSDiskSizeInMB,ResourceDiskSizeInMB | Format-Table
+            service_offering = "REGIONAL-SERVICE-OFFERING"
+            resource_group = "AZURE RESOURCEGROUP NAME"
+            master_image = "NAME OF SNAPSHOT LOCATED IN RESOURCE GROUP"
+            }
+        network_mapping = {
+            network_device = "0"
+            network = "AZURE VNET SUBNET NAME"
+            }
+      	number_of_total_machines =  ADD-A-VALUE
+        machine_account_creation_rules ={
+	          #15 Character limit on naming_scheme
+	          #KEEP NAMING_SCHEME IT UNDER 15 CHARACTER OR IT WILL FAIL
+            naming_scheme =     "XX-XX-XX-##"
+      	    #THIS CAN BE Numeric, Alphabetic or Unicode.
+            naming_scheme_type ="NUMERIC-EXAMPLE"
+            domain =            "DOMAIN FQDN"
+            }
+      }
+}
+
+resource "citrix_daas_delivery_group" "AZURE-DELIVERY-GROUP" {
+    name = "DELIVERY-GROUP-NAME"
+    associated_machine_catalogs = [
+        {
+        machine_catalog = citrix_daas_machine_catalog.AZURE-CATALOG.id
+        #HOW-MANY-MACHINES-FROM-CATALOG-DO-YOU-ASSIGN-TO-DELIVERY-GROUP
+        machine_count = 1   
+        }
+    ]
+    #AUTOSCALE IS EITHER TRUE OR FALSE
+    autoscale_enabled = true  
+    users = [
+        "adduser1@terraformtest.com",
+      	"adduser2@terraformtest.com",
+      	"adduser3@terraformtest.com",
+        ]
+    autoscale_settings = {
+        disconnect_peak_idle_session_after_seconds = 3600
+        log_off_peak_disconnected_session_after_seconds = 3600
+        peak_log_off_action = "Nothing"
+        power_time_schemes = [
+            {
+                days_of_week = [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday"
+                ]
+                display_name = "AUTOSCALE CONFIG NAME"
+                peak_time_ranges = [
+                    "09:00-17:00"
+                ]
+                pool_size_schedules = [
+                    {
+                        "time_range": "00:00-00:00",
+                        "pool_size": 1
+                    }
+                ],
+                pool_using_percentage = false
+            },
+        ]
+    }
+}
